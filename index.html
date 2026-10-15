@@ -344,7 +344,8 @@ function save(){clearTimeout(saveT);saveT=setTimeout(()=>{
 
 /* ---------- scale ---------- */
 const stage=$('#stage'),sheet=$('#sheet');let K=1;
-function fit(){K=Math.min(1,stage.clientWidth/W);sheet.style.transform='scale('+K+')';stage.style.height=Math.ceil(sheet.offsetHeight*K)+'px';placeBar();placeAdjBar();}
+let exporting=false;
+function fit(){if(exporting)return;K=Math.min(1,stage.clientWidth/W);sheet.style.transform='scale('+K+')';stage.style.height=Math.ceil(sheet.offsetHeight*K)+'px';placeBar();placeAdjBar();}
 new ResizeObserver(fit).observe(stage);new ResizeObserver(fit).observe(sheet);
 
 /* ---------- fonts ---------- */
@@ -747,11 +748,12 @@ $('#exportBtn').addEventListener('click',async()=>{
   if(typeof html2canvas!=='function'){statusEl.textContent='저장 도구를 불러오지 못했어요. 새로고침 후 다시 시도하세요';return;}
   const was=document.body.classList.contains('preview');setPreview(true);
   const btn=$('#exportBtn');btn.disabled=true;btn.textContent='만드는 중…';
-  sheet.style.transform='none';
+  exporting=true;sheet.style.transform='none';
   let restore=[];
   try{
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
     restore=await flattenPics();
+    sheet.style.transform='none';
     const canvas=await html2canvas(sheet,{scale:2,backgroundColor:S.style.bg,logging:false,width:W,windowWidth:W+200,scrollX:0,scrollY:-window.scrollY});
     const url=canvas.toDataURL('image/png');
     try{const a=document.createElement('a');a.href=url;a.download=((S.pairName||'페어틀').replace(/[\\/:*?"<>|]/g,'').trim()||'페어틀')+'.png';document.body.append(a);a.click();a.remove();}catch(e){}
@@ -763,7 +765,7 @@ $('#exportBtn').addEventListener('click',async()=>{
     ov.addEventListener('click',e=>{if(e.target===ov)close();});
     document.body.append(ov);$('button',ov).focus();
   }catch(e){console.error(e);statusEl.textContent='이미지를 만들지 못했어요: '+((e&&e.message)||e);}
-  finally{restore.forEach(f=>f());setPreview(was);fit();btn.disabled=false;btn.textContent='이미지로 저장';}
+  finally{exporting=false;restore.forEach(f=>f());setPreview(was);fit();btn.disabled=false;btn.textContent='이미지로 저장';}
 });
 fit();
 })();
