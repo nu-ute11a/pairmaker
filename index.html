@@ -64,7 +64,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .stage{position:relative;width:100%;overflow:hidden;border-radius:6px;box-shadow:0 1px 0 var(--line),0 10px 30px -18px rgba(0,0,0,.35)}
 #sheet{
   --s-bg:#ffffff;--s-ink:#1b1b20;--s-title:#1b1b20;--s-muted:#74747e;--s-slot:#f0f0f3;
-  --s-line:color-mix(in srgb,var(--s-muted) 45%,transparent);
+  --s-line:rgba(116,116,126,.45);
   width:1600px;position:relative;transform-origin:0 0;background:var(--s-bg);color:var(--s-ink);
   --s-font:var(--f);
   padding:48px 40px 44px;font-family:var(--s-font);letter-spacing:-.01em}
@@ -353,6 +353,7 @@ function mixHex(a,b,t){const pa=a.match(/\w\w/g).map(x=>parseInt(x,16)),pb=b.mat
 function applyStyle(){
   if(!S.style.title)S.style.title=S.style.ink;
   sheet.style.setProperty('--s-slot',mixHex(S.style.bg,S.style.ink,0.06));
+  {const m=S.style.muted.match(/\w\w/g).map(x=>parseInt(x,16));sheet.style.setProperty('--s-line','rgba('+m.join(',')+',.45)');}
   ['bg','ink','muted','title'].forEach(k=>{sheet.style.setProperty('--s-'+k,S.style[k]);$('[data-sw="'+k+'"]').style.background=S.style[k];$('#c-'+k).value=S.style[k];});
 }
 $$('.deco input[type=color]').forEach(inp=>inp.addEventListener('input',()=>{S.style[inp.dataset.s]=inp.value;applyStyle();save();}));
@@ -629,6 +630,7 @@ $('#exportBtn').addEventListener('click',async()=>{
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
     const canvas=await html2canvas(sheet,{scale:2,backgroundColor:S.style.bg,logging:false,width:W,windowWidth:W+200,scrollX:0,scrollY:-window.scrollY});
     const url=canvas.toDataURL('image/png');
+    try{const a=document.createElement('a');a.href=url;a.download=((S.pairName||'페어틀').replace(/[\\/:*?"<>|]/g,'').trim()||'페어틀')+'.png';document.body.append(a);a.click();a.remove();}catch(e){}
     const ov=document.createElement('div');ov.className='overlay';
     ov.innerHTML='<div class="ov-box"><p>완성 이미지입니다. 이미지를 우클릭하거나 길게 눌러 저장하세요.</p><img alt="완성된 페어틀"><button class="btn" type="button">닫기</button></div>';
     $('img',ov).src=url;
@@ -636,7 +638,7 @@ $('#exportBtn').addEventListener('click',async()=>{
     $('button',ov).addEventListener('click',close);
     ov.addEventListener('click',e=>{if(e.target===ov)close();});
     document.body.append(ov);$('button',ov).focus();
-  }catch(e){statusEl.textContent='이미지를 만들지 못했어요. 다시 시도해 주세요';}
+  }catch(e){console.error(e);statusEl.textContent='이미지를 만들지 못했어요: '+((e&&e.message)||e);}
   finally{setPreview(was);fit();btn.disabled=false;btn.textContent='이미지로 저장';}
 });
 fit();
