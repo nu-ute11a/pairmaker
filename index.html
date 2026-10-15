@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>페어틀 메이커</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,6 +30,9 @@
   --accent:#ff7486; --accent-soft:#3a2128; --danger:#e58585; color-scheme:dark}
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+img{max-width:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
 .wrap{max-width:1640px;margin:0 auto}
@@ -181,6 +189,8 @@ textarea.f:focus{outline:none;border-color:var(--accent)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
+</head>
+<body>
 <div class="wrap">
   <div class="bar">
     <div class="bar-row">
@@ -632,3 +642,6 @@ $('#exportBtn').addEventListener('click',async()=>{
 fit();
 })();
 </script>
+
+</body>
+</html>
