@@ -738,9 +738,12 @@ async function flattenPics(){
     const dw=v.bw!=null?w*v.bw/100:Math.max(w,h*ratio),dh=dw/ratio;
     const dx=(w-dw)*(v.px??.5),dy=(h-dh)*(v.py??.5);
     g.imageSmoothingQuality='high';g.drawImage(img,dx*sc,dy*sc,dw*sc,dh*sc);
-    const old={bi:p.style.backgroundImage,bs:p.style.backgroundSize,bp:p.style.backgroundPosition,bc:p.style.backgroundColor};
-    p.style.backgroundImage='url("'+c.toDataURL('image/png')+'")';p.style.backgroundSize='100% 100%';p.style.backgroundPosition='0 0';p.style.backgroundColor='transparent';
-    undo.push(()=>{p.style.backgroundImage=old.bi;p.style.backgroundSize=old.bs;p.style.backgroundPosition=old.bp;p.style.backgroundColor=old.bc;});
+    // 배경 이미지로 그리면 저장 도구가 반 픽셀 어긋나 반대편 가장자리가 한 줄 비쳐 보임 → <img>로 정확히 그림
+    const im=document.createElement('img');im.alt='';im.src=c.toDataURL('image/png');
+    im.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;display:block;max-width:none';
+    await new Promise(r=>{if(im.complete)r();else{im.onload=r;im.onerror=r;}});
+    const old=p.style.visibility;p.style.visibility='hidden';el.insertBefore(im,p);
+    undo.push(()=>{im.remove();p.style.visibility=old;});
   }
   return undo;
 }
